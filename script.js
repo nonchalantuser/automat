@@ -2,7 +2,7 @@
 
 /* ════════════════════════════════════════
    AUTOMAT INDUSTRIES — script.js
-   Professional, clean interactions
+   Engineers & Fabricators — Est. 1977
    ════════════════════════════════════════ */
 
 // ── Preloader ─────────────────────────────
@@ -16,94 +16,22 @@ window.addEventListener('load', () => {
     initScrollAnimations();
     initCounters();
     initProcessSteps();
+    initBarChartAnimation();
   }, 2000);
 });
 
-// ── Hero Canvas — subtle particle network ─
-(function initCanvas() {
-  const canvas = document.getElementById('hero-canvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  let W, H, particles = [];
-  const COUNT = 60;
-  const LINK_DIST = 130;
 
-  function resize() {
-    W = canvas.width  = canvas.offsetWidth;
-    H = canvas.height = canvas.offsetHeight;
-  }
 
-  class Particle {
-    constructor() { this.reset(true); }
-    reset(rand = false) {
-      this.x  = Math.random() * W;
-      this.y  = rand ? Math.random() * H : H + 8;
-      this.vx = (Math.random() - 0.5) * 0.35;
-      this.vy = -(Math.random() * 0.4 + 0.15);
-      this.r  = Math.random() * 1.8 + 0.4;
-      this.life = 0;
-      this.max  = Math.random() * 250 + 200;
-    }
-    step() {
-      this.x += this.vx;
-      this.y += this.vy;
-      this.life++;
-      if (this.life > this.max || this.y < -10) this.reset();
-    }
-    draw() {
-      const a = Math.min(this.life / 40, 1) * Math.min((this.max - this.life) / 40, 1) * 0.55;
-      ctx.beginPath();
-      ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(52,193,90,${a})`;
-      ctx.fill();
-    }
-  }
-
-  function drawLinks() {
-    for (let i = 0; i < particles.length; i++) {
-      for (let j = i + 1; j < particles.length; j++) {
-        const a = particles[i], b = particles[j];
-        const d = Math.hypot(a.x - b.x, a.y - b.y);
-        if (d < LINK_DIST) {
-          const alpha = (1 - d / LINK_DIST) * 0.12;
-          ctx.beginPath();
-          ctx.moveTo(a.x, a.y);
-          ctx.lineTo(b.x, b.y);
-          ctx.strokeStyle = `rgba(52,193,90,${alpha})`;
-          ctx.lineWidth = 0.8;
-          ctx.stroke();
-        }
-      }
-    }
-  }
-
-  function loop() {
-    ctx.clearRect(0, 0, W, H);
-    drawLinks();
-    particles.forEach(p => { p.step(); p.draw(); });
-    requestAnimationFrame(loop);
-  }
-
-  resize();
-  window.addEventListener('resize', resize);
-  particles = Array.from({ length: COUNT }, () => new Particle());
-  loop();
-})();
-
-// ── Navbar ────────────────────────────────
+// ── Navbar active link tracking ─────────────
 (function initNavbar() {
-  const nav    = document.getElementById('navbar');
-  const links  = document.querySelectorAll('.nav-link');
-  const secs   = document.querySelectorAll('section[id]');
+  const links = document.querySelectorAll('.nav-link');
+  const secs  = document.querySelectorAll('section[id]');
+  const OFFSET = 130; // header height (top bar + nav)
 
   function update() {
-    // scrolled class
-    nav.classList.toggle('scrolled', window.scrollY > 50);
-
-    // active link
     let curr = '';
     secs.forEach(s => {
-      if (window.scrollY >= s.offsetTop - 120) curr = s.id;
+      if (window.scrollY >= s.offsetTop - OFFSET) curr = s.id;
     });
     links.forEach(l => {
       l.classList.toggle('active', l.getAttribute('href') === `#${curr}`);
@@ -127,9 +55,7 @@ window.addEventListener('load', () => {
     document.body.style.overflow = open ? 'hidden' : '';
   });
 
-  // close on any link click
   menu.querySelectorAll('a').forEach(a => a.addEventListener('click', close));
-  // close on outside click
   document.addEventListener('click', e => {
     if (!btn.contains(e.target) && !menu.contains(e.target)) close();
   });
@@ -153,11 +79,11 @@ function initScrollAnimations() {
       setTimeout(() => el.classList.add('visible'), delay);
       io.unobserve(el);
     });
-  }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
+  }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
 
   // stagger cards inside grids
   document.querySelectorAll(
-    '.products-grid, .industries-grid, .standards-grid, .he-features-row, .fab-items-grid'
+    '.industries-grid, .standards-grid, .mfg-stats, .eng-cards, .clients-grid, .org-tree .org-row'
   ).forEach(grid => {
     grid.querySelectorAll('[data-animate]').forEach((el, i) => {
       el.dataset.delay = i * 70;
@@ -195,7 +121,7 @@ function animateNum(el) {
   }, tick);
 }
 
-// ── Product Tabs ──────────────────────────
+// ── Desktop Product Tabs ──────────────────
 (function initTabs() {
   const btns     = document.querySelectorAll('.tab-btn');
   const contents = document.querySelectorAll('.tab-content');
@@ -217,6 +143,86 @@ function animateNum(el) {
     });
   }));
 })();
+
+// ── Mobile Product Accordion ──────────────
+(function initProductAccordion() {
+  const headers = document.querySelectorAll('.acc-header');
+
+  headers.forEach(header => {
+    header.addEventListener('click', () => {
+      const targetId = header.dataset.acc;
+      const body = document.getElementById(`acc-body-${targetId}`);
+      if (!body) return;
+
+      const isOpen = header.classList.contains('active');
+
+      // Close all
+      document.querySelectorAll('.acc-header').forEach(h => h.classList.remove('active'));
+      document.querySelectorAll('.acc-body').forEach(b => b.classList.remove('open'));
+
+      // If was closed, open this one
+      if (!isOpen) {
+        header.classList.add('active');
+        body.classList.add('open');
+      }
+    });
+  });
+})();
+
+// ── Materials Accordion ───────────────────
+(function initMaterialsAccordion() {
+  const headers = document.querySelectorAll('.mat-acc-header');
+
+  headers.forEach(header => {
+    header.addEventListener('click', () => {
+      const targetId = header.dataset.matacc;
+      const item = header.closest('.mat-acc-item');
+      const body = document.getElementById(`mat-body-${targetId}`);
+      const chevron = header.querySelector('.mat-chevron');
+
+      if (!body || !item) return;
+
+      const isOpen = item.classList.contains('open');
+
+      // Toggle this item
+      if (isOpen) {
+        item.classList.remove('open');
+        body.classList.add('collapsed');
+        if (chevron) chevron.classList.remove('open');
+      } else {
+        item.classList.add('open');
+        body.classList.remove('collapsed');
+        if (chevron) chevron.classList.add('open');
+      }
+    });
+  });
+})();
+
+// ── Bar Chart Animation ────────────────────
+function initBarChartAnimation() {
+  const bars = document.querySelectorAll('.bar-fill');
+  if (!bars.length) return;
+
+  // Save and reset heights to animate them in
+  bars.forEach(bar => {
+    const targetH = bar.style.getPropertyValue('--bar-h');
+    bar.style.setProperty('--bar-h', '0%');
+    bar._targetH = targetH;
+  });
+
+  const io = new IntersectionObserver(entries => {
+    if (!entries[0].isIntersecting) return;
+    bars.forEach((bar, i) => {
+      setTimeout(() => {
+        bar.style.setProperty('--bar-h', bar._targetH);
+      }, i * 150);
+    });
+    io.disconnect();
+  }, { threshold: 0.3 });
+
+  const chart = document.querySelector('.bar-chart');
+  if (chart) io.observe(chart);
+}
 
 // ── Back to Top ───────────────────────────
 (function initBackToTop() {
@@ -241,29 +247,12 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
   });
 });
 
-// ── Contact form ──────────────────────────
-function handleFormSubmit(e) {
-  e.preventDefault();
-  const btn = document.getElementById('form-submit-btn');
-  const msg = document.getElementById('form-success');
-  const frm = document.getElementById('contact-form');
 
-  btn.disabled   = true;
-  btn.style.opacity = '0.7';
-  btn.querySelector('span').textContent = 'Sending…';
-
-  setTimeout(() => {
-    frm.reset();
-    btn.disabled  = false;
-    btn.style.opacity = '1';
-    btn.querySelector('span').textContent = 'Send Enquiry';
-    msg.classList.add('visible');
-    setTimeout(() => msg.classList.remove('visible'), 5000);
-  }, 1500);
-}
-
-// ── Footer tab helper ─────────────────────
+// ── Footer tab helper (updated for new tab IDs) ──
 function setTab(tabName) {
+  // On mobile, do nothing (accordion is shown instead)
+  if (window.innerWidth <= 768) return;
+
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
   const btn  = document.querySelector(`[data-tab="${tabName}"]`);
@@ -298,20 +287,20 @@ function initProcessSteps() {
   io.observe(wrap);
 }
 
-// ── Subtle card hover lift (no tilt on mobile) ─
+// ── Subtle card hover lift ─────────────────
 (function initCardLift() {
   if (window.matchMedia('(hover: none)').matches) return;
 
   const cards = document.querySelectorAll(
-    '.product-card, .industry-card, .standard-card, .he-feature, .fab-item, .asc, .contact-card'
+    '.industry-card, .standard-card, .asc, .contact-card, .eng-card, .mfg-stat-card, .client-badge'
   );
   cards.forEach(card => {
     card.addEventListener('mousemove', e => {
       const r  = card.getBoundingClientRect();
       const x  = e.clientX - r.left - r.width / 2;
       const y  = e.clientY - r.top  - r.height / 2;
-      const rx = (y / r.height) * 5;
-      const ry = -(x / r.width) * 5;
+      const rx = (y / r.height) * 4;
+      const ry = -(x / r.width) * 4;
       card.style.transform = `perspective(600px) rotateX(${rx}deg) rotateY(${ry}deg) translateY(-4px)`;
     });
     card.addEventListener('mouseleave', () => { card.style.transform = ''; });
@@ -320,7 +309,7 @@ function initProcessSteps() {
 
 // ── Log ───────────────────────────────────
 console.log(
-  '%cAUTOMAT INDUSTRIES%c\nEngineers & Fabricators — Est. 1977 | Ankleshwar, Gujarat',
+  '%cAUTOMAT INDUSTRIES%c\nEngineers & Fabricators — Est. 1977 | Ankleshwar, Gujarat\nGSTIN: 24AEBPP4548K1ZB',
   'color:#1e7e34;font-size:18px;font-weight:900;',
   'color:#6c757d;font-size:11px;'
 );
