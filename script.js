@@ -95,7 +95,7 @@ function initScrollAnimations() {
 
 // ── Counter animation ──────────────────────
 function initCounters() {
-  const nums = document.querySelectorAll('.stat-number[data-target]');
+  const nums = document.querySelectorAll('.stat-number[data-target], .hv2-stat-num[data-target]');
 
   const io = new IntersectionObserver(entries => {
     entries.forEach(entry => {
@@ -306,6 +306,21 @@ function initProcessSteps() {
     card.addEventListener('mouseleave', () => { card.style.transform = ''; });
   });
 })();
+
+// ── Switch Product Images ──────────────────
+function switchAutoclaveImage(index) {
+  // Update desktop
+  const dImgs = document.querySelectorAll('#tab-content-autoclaves .product-img');
+  const dDots = document.querySelectorAll('#tab-content-autoclaves .img-nav-dot');
+  dImgs.forEach((img, i) => img.classList.toggle('active', i === index - 1));
+  dDots.forEach((dot, i) => dot.classList.toggle('active', i === index - 1));
+
+  // Update mobile
+  const mImgs = document.querySelectorAll('#acc-body-autoclaves .product-img');
+  const mDots = document.querySelectorAll('#acc-body-autoclaves .img-nav-dot');
+  mImgs.forEach((img, i) => img.classList.toggle('active', i === index - 1));
+  mDots.forEach((dot, i) => dot.classList.toggle('active', i === index - 1));
+}
 
 // ── Log ───────────────────────────────────
 console.log(
